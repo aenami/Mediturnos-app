@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { useMemo } from "react";
 
+import SpecialtySelect from "../components/appointments/SpecialtySelect";
+import DoctorSelect from "../components/appointments/DoctorSelect";
+import HourSelect from "../components/appointments/HoursSelect";
+
 type ModalProps = {
     onClose: () => void;
 };
@@ -155,42 +159,21 @@ function ScheduleApModal({ onClose }: ModalProps) {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
 
-                    {/* ESPECIALIDAD */}
-                    <select
-                        value={selectedSpecialty ?? ""}
+                    <SpecialtySelect
+                        specialities={specialities}
+                        selectedSpecialty={selectedSpecialty}
                         onChange={handlerSpecialtyChange}
-                        className="w-full border rounded-xl p-3"
-                    >
-                        <option value="" disabled>
-                            Selecciona especialidad...
-                        </option>
-                        {specialities.map((s) => (
-                            <option key={s.id_especialidad} value={s.id_especialidad}>
-                                {s.nombre_especialidad}
-                            </option>
-                        ))}
-                    </select>
+                    />
 
-                    {/* DOCTOR */}
-                    {step >= 2 && (
-                        <select
-                            value={selectedDoctor ?? ""}
+                    {selectedSpecialty && (
+                        <DoctorSelect
+                            doctors={doctors}
+                            selectedDoctor={selectedDoctor}
                             onChange={handlerDoctorChange}
-                            className="w-full border rounded-xl p-3"
-                        >
-                            <option value="" disabled>
-                                Selecciona doctor...
-                            </option>
-                            {doctors.map((doc) => (
-                                <option key={doc.id_doctor} value={doc.id_doctor}>
-                                    {doc.nombre_doctor} {doc.apellidos_doctor}
-                                </option>
-                            ))}
-                        </select>
+                        />
                     )}
 
-                    {/* CALENDARIO */}
-                    {step >= 3 && (
+                    {selectedDoctor && (
                         <Calendar
                             mode="single"
                             selected={date}
@@ -199,23 +182,12 @@ function ScheduleApModal({ onClose }: ModalProps) {
                         />
                     )}
 
-                    {/* HORARIOS */}
-                    {date && selectedDoctor && availableHours.length > 0 && (
-                        <select
-                            value={selectedHour ?? ""}
+                    {date && selectedDoctor && (
+                        <HourSelect
+                            availableHours={availableHours}
+                            selectedHour={selectedHour}
                             onChange={(e) => setSelectedHour(e.target.value)}
-                            className="w-full border rounded-xl p-3"
-                        >
-                            <option value="" disabled>
-                                Selecciona horario...
-                            </option>
-
-                            {availableHours.map((hour) => (
-                                <option key={hour} value={hour}>
-                                    {hour}
-                                </option>
-                            ))}
-                        </select>
+                        />
                     )}
 
                     <div className="flex justify-end gap-3">
