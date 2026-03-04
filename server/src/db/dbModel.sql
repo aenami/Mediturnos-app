@@ -93,11 +93,11 @@ CREATE TABLE Cita(
 
     -- LOGIC CONSTRAINTS
     CONSTRAINT check_fecha_cita 
-        CHECK(fecha_cita >= CURRENT_TIMESTAMP),
+        CHECK(fecha_cita >= CURRENT_DATE),
 
     CONSTRAINT unique_doctor_fecha
-        UNIQUE(id_doctor_cita, fecha_cita),
+        UNIQUE(id_doctor_cita, fecha_cita, hora_cita),
 
     CONSTRAINT unique_paciente_fecha
-        UNIQUE(id_paciente_cita, fecha_cita)
+        UNIQUE(id_paciente_cita, fecha_cita, hora_cita)
 );

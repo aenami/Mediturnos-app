@@ -39,6 +39,8 @@ function ScheduleApModal({ onClose }: ModalProps) {
     const [selectedSpecialty, setSelectedSpecialty] = useState<number | null>(null);
     const [selectedDoctor, setSelectedDoctor] = useState<number | null>(null);
 
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
     // -------------------- FETCH SPECIALITIES --------------------
     useEffect(() => {
         fetch("http://localhost:3000/specialities")
@@ -118,10 +120,11 @@ function ScheduleApModal({ onClose }: ModalProps) {
     };
 
     const isDateDisabled = (currentDate: Date) => {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date();
+        tomorrow.setHours(0, 0, 0, 0);
+        tomorrow.setDate(tomorrow.getDate() + 1);
 
-        return currentDate < today;
+        return currentDate < tomorrow;
     };
 
     // -------------------- POST APPOINTMENT --------------------
@@ -146,14 +149,41 @@ function ScheduleApModal({ onClose }: ModalProps) {
                 body: JSON.stringify(payload),
             });
 
-            alert("Cita agendada correctamente ");
-            onClose();
+            setSuccessMessage("¡Tu cita fue agendada correctamente!");
+            
         } catch (error) {
             console.error("Error al crear cita:", error);
         }
     };
 
     // -------------------- UI --------------------
+    if (successMessage) {
+        return (
+            <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40 backdrop-blur-sm">
+                <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md text-center space-y-6">
+
+                    <div className="text-green-600 text-5xl">
+                        ✓
+                    </div>
+
+                    <h2 className="text-2xl font-bold">
+                        ¡Cita Confirmada!
+                    </h2>
+
+                    <p className="text-gray-600">
+                        {successMessage}
+                    </p>
+
+                    <button
+                        onClick={onClose}
+                        className="px-6 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
+                    >
+                        Entendido
+                    </button>
+                </div>
+            </div>
+        );
+    }
     return (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40 backdrop-blur-sm">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
