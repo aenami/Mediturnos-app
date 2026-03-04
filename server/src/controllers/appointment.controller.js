@@ -17,3 +17,31 @@ export const getAppointmentsDoctor = async (req, res) =>{
     }
 
 }
+
+export const createAppointment = async (req, res) => {
+    const { id_doctor, fecha, hora, motivo } = req.body;
+
+    // Validación básica
+    if (!id_doctor || !fecha || !hora || !motivo) {
+        return res.status(400).json({
+            error: "Todos los campos son obligatorios"
+        });
+    }
+
+    try {
+        // Simulamos un paciente colocandole el id 1
+        await Appointment.createAppointment(motivo, fecha, hora, 1, id_doctor);
+
+        res.status(201).json({
+            message: "Cita creada correctamente"
+        });
+
+    } catch (error) {
+        console.error("Error creando cita:", error);
+        res.status(500).json({
+            error: "Error interno del servidor"
+        });
+    }
+};
+
+
