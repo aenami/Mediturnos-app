@@ -6,4 +6,7 @@ const router = express.Router();
 // Traer todos los doctores
 router.get("/doctors/:id_doctor", getAppointmentsDoctor)
 
+// Agendar una cita
+
+
 export default router

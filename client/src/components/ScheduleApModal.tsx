@@ -31,6 +31,7 @@ function ScheduleApModal({ onClose }: ModalProps) {
     const [date, setDate] = useState<Date | undefined>();
     const [selectedHour, setSelectedHour] = useState<string | null>(null);
 
+    const [reason, setReason] = useState("");
     const [specialities, setSpecialities] = useState<Speciality[]>([]);
     const [doctors, setDoctors] = useState<Doctor[]>([]);
     const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -133,6 +134,7 @@ function ScheduleApModal({ onClose }: ModalProps) {
             id_doctor: selectedDoctor,
             fecha: date.toISOString().split("T")[0],
             hora: selectedHour,
+            motivo: reason
         };
 
         try {
@@ -144,7 +146,7 @@ function ScheduleApModal({ onClose }: ModalProps) {
                 body: JSON.stringify(payload),
             });
 
-            alert("Cita agendada correctamente 🎉");
+            alert("Cita agendada correctamente ");
             onClose();
         } catch (error) {
             console.error("Error al crear cita:", error);
@@ -154,60 +156,79 @@ function ScheduleApModal({ onClose }: ModalProps) {
     // -------------------- UI --------------------
     return (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
                 <h2 className="text-2xl font-bold mb-6">Agendar Nueva Cita</h2>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="overflow-y-auto px-8 py-6">
+                    <form onSubmit={handleSubmit} className="space-y-6">
 
-                    <SpecialtySelect
-                        specialities={specialities}
-                        selectedSpecialty={selectedSpecialty}
-                        onChange={handlerSpecialtyChange}
-                    />
-
-                    {selectedSpecialty && (
-                        <DoctorSelect
-                            doctors={doctors}
-                            selectedDoctor={selectedDoctor}
-                            onChange={handlerDoctorChange}
+                        <SpecialtySelect
+                            specialities={specialities}
+                            selectedSpecialty={selectedSpecialty}
+                            onChange={handlerSpecialtyChange}
                         />
-                    )}
 
-                    {selectedDoctor && (
-                        <Calendar
-                            mode="single"
-                            selected={date}
-                            onSelect={setDate}
-                            disabled={isDateDisabled}
-                        />
-                    )}
+                        {selectedSpecialty && (
+                            <DoctorSelect
+                                doctors={doctors}
+                                selectedDoctor={selectedDoctor}
+                                onChange={handlerDoctorChange}
+                            />
+                        )}
 
-                    {date && selectedDoctor && (
-                        <HourSelect
-                            availableHours={availableHours}
-                            selectedHour={selectedHour}
-                            onChange={(e) => setSelectedHour(e.target.value)}
-                        />
-                    )}
+                        {selectedDoctor && (
+                            <Calendar
+                                mode="single"
+                                selected={date}
+                                onSelect={setDate}
+                                disabled={isDateDisabled}
+                            />
+                        )}
 
-                    <div className="flex justify-end gap-3">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="px-4 py-2 bg-gray-200 rounded-xl"
-                        >
-                            Cancelar
-                        </button>
+                        {date && selectedDoctor && (
+                            <HourSelect
+                                availableHours={availableHours}
+                                selectedHour={selectedHour}
+                                onChange={(e) => setSelectedHour(e.target.value)}
+                            />
+                        )}
 
-                        <button
-                            type="submit"
-                            disabled={!selectedHour}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-xl disabled:opacity-40"
-                        >
-                            Confirmar
-                        </button>
-                    </div>
-                </form>
+                        {selectedHour && (
+                            <div className="flex flex-col">
+                                <label className="mb-2 font-medium">
+                                    Motivo de la cita
+                                </label>
+                                <textarea
+                                    value={reason}
+                                    onChange={(e) => setReason(e.target.value)}
+                                    rows={3}
+                                    className="border rounded-xl p-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Describe brevemente el motivo..."
+                                    required
+                                />
+                            </div>
+                        )}
+
+                        <div className="flex justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="px-4 py-2 bg-gray-200 rounded-xl"
+                            >
+                                Cancelar
+                            </button>
+
+                            <button
+                                type="submit"
+                                disabled={!selectedHour || !reason.trim()}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-xl disabled:opacity-40"
+                            >
+                                Confirmar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
             </div>
         </div>
     );
