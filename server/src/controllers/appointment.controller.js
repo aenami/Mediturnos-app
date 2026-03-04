@@ -6,8 +6,9 @@ export const getAppointmentsDoctor = async (req, res) =>{
     const { id_doctor } = req.params;
 
     try {
-        const doctors = await Appointment.getAppointmentsDoctor(id_doctor) // Pasarle el id del doctor
-        res.status(200).json(doctors)
+        const appointments = await Appointment.getAppointmentsDoctor(id_doctor) // Pasarle el id del doctor
+        console.log(appointments)
+        res.status(200).json(appointments)
     } catch (error) {
         console.log('Error obteniendo fechas: ', error)
         res.status(500).json({

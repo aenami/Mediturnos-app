@@ -1,230 +1,244 @@
 import React, { useState, useEffect } from "react";
 import { Calendar } from "@/components/ui/calendar";
+import { useMemo } from "react";
 
 type ModalProps = {
-  onClose: () => void;
+    onClose: () => void;
 };
 
-function ScheduleApModal({ onClose }: ModalProps) {
-  const [step, setStep] = useState(1);
-  const [date, setDate] = useState<Date | undefined>(undefined);
-  const [isVisible, setIsVisible] = useState(false);
-
-  interface Doctor {
+interface Doctor {
     id_doctor: number;
     nombre_doctor: string;
     apellidos_doctor: string;
-  }
+}
 
-  interface Speciality {
+interface Speciality {
     id_especialidad: number;
     nombre_especialidad: string;
-  }
+}
 
-  const [specialities, setSpecialities] = useState<Speciality[]>([]);
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [selectedSpecialty, setSelectedSpecialty] = useState<number | null>(null);
-  const [selectedDoctor, setSelectedDoctor] = useState<number | null>(null);
-  const [doctorDates, setDoctorDates] = useState<Date[]>([]);
+interface Appointment {
+    fecha: string;
+    hora: string;
+}
 
-  // -------------------- BLOQUEAR SCROLL DEL BODY --------------------
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    setTimeout(() => setIsVisible(true), 10);
+function ScheduleApModal({ onClose }: ModalProps) {
+    const [step, setStep] = useState(1);
+    const [date, setDate] = useState<Date | undefined>();
+    const [selectedHour, setSelectedHour] = useState<string | null>(null);
 
-    return () => {
-      document.body.style.overflow = "auto";
+    const [specialities, setSpecialities] = useState<Speciality[]>([]);
+    const [doctors, setDoctors] = useState<Doctor[]>([]);
+    const [appointments, setAppointments] = useState<Appointment[]>([]);
+
+    const [selectedSpecialty, setSelectedSpecialty] = useState<number | null>(null);
+    const [selectedDoctor, setSelectedDoctor] = useState<number | null>(null);
+
+    // -------------------- FETCH SPECIALITIES --------------------
+    useEffect(() => {
+        fetch("http://localhost:3000/specialities")
+            .then((res) => res.json())
+            .then(setSpecialities);
+    }, []);
+
+    // -------------------- GENERAR HORARIOS BASE --------------------
+    const generateBaseHours = () => {
+        const hours: string[] = [];
+
+        for (let h = 8; h <= 16; h++) {
+            if (h === 12) continue; // Almuerzo
+
+            const formatted = `${h.toString().padStart(2, "0")}:00`;
+            hours.push(formatted);
+        }
+
+        return hours;
     };
-  }, []);
+    
+    // -------------------- FILTRAR HORARIOS DISPONIBLES --------------------
+    const availableHours = useMemo(() => {
+        if (!date || !selectedDoctor) return [];
 
-  // -------------------- FETCH SPECIALITIES --------------------
-  useEffect(() => {
-    fetch("http://localhost:3000/specialities")
-      .then((res) => res.json())
-      .then((data) => setSpecialities(data))
-      .catch((error) =>
-        console.error("Error al traer especialidades:", error)
-      );
-  }, []);
+        const baseHours = generateBaseHours();
+        const selectedDateString = date.toISOString().split("T")[0];
 
-  const handlerSpecialtyChange = async (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const id_specialty = Number(e.target.value);
+        const occupiedHours = appointments
+            .filter((a) => a.fecha === selectedDateString)
+            .map((a) => a.hora);
 
-    setSelectedSpecialty(id_specialty);
-    setSelectedDoctor(null);
-    setDoctors([]);
-    setDoctorDates([]);
-    setDate(undefined);
+        return baseHours.filter(
+            (hour) => !occupiedHours.includes(hour)
+        );
+    }, [date, selectedDoctor, appointments]);
 
-    try {
-      const res = await fetch(
-        `http://localhost:3000/doctors/specialities/${id_specialty}`
-      );
-      const data = await res.json();
-      setDoctors(data);
-      setStep(2);
-    } catch (error) {
-      console.error("Error al traer doctores:", error);
-    }
-  };
+    // -------------------- HANDLERS --------------------
+    const handlerSpecialtyChange = async (
+        e: React.ChangeEvent<HTMLSelectElement>
+    ) => {
+        const id_specialty = Number(e.target.value);
 
-  const handlerDoctorChange = async (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const id_doctor = Number(e.target.value);
+        setSelectedSpecialty(id_specialty);
+        setSelectedDoctor(null);
+        setDoctors([]);
+        setAppointments([]);
+        setDate(undefined);
+        setSelectedHour(null);
 
-    setSelectedDoctor(id_doctor);
-    setDoctorDates([]);
-    setDate(undefined);
+        const res = await fetch(
+            `http://localhost:3000/doctors/specialities/${id_specialty}`
+        );
 
-    try {
-      const res = await fetch(
-        `http://localhost:3000/appointments/doctors/${id_doctor}`
-      );
+        const data = await res.json();
+        setDoctors(data);
+        setStep(2);
+    };
 
-      const data = await res.json();
-      const parsedDates = data.map((d: string) => new Date(d));
-      setDoctorDates(parsedDates);
+    const handlerDoctorChange = async (
+        e: React.ChangeEvent<HTMLSelectElement>
+    ) => {
+        const id_doctor = Number(e.target.value);
 
-      setStep(3);
-    } catch (error) {
-      console.error("Error al traer fechas ocupadas:", error);
-    }
-  };
+        setSelectedDoctor(id_doctor);
+        setDate(undefined);
+        setSelectedHour(null);
 
-  const isDateDisabled = (currentDate: Date) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+        const res = await fetch(
+            `http://localhost:3000/appointments/doctors/${id_doctor}`
+        );
 
-    if (currentDate < today) return true;
+        const data = await res.json();
+        setAppointments(data);
 
-    return doctorDates.some(
-      (d) => d.toDateString() === currentDate.toDateString()
+        setStep(3);
+    };
+
+    const isDateDisabled = (currentDate: Date) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        return currentDate < today;
+    };
+
+    // -------------------- POST APPOINTMENT --------------------
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!selectedDoctor || !date || !selectedHour) return;
+
+        const payload = {
+            id_doctor: selectedDoctor,
+            fecha: date.toISOString().split("T")[0],
+            hora: selectedHour,
+        };
+
+        try {
+            await fetch("http://localhost:3000/appointments", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+            });
+
+            alert("Cita agendada correctamente 🎉");
+            onClose();
+        } catch (error) {
+            console.error("Error al crear cita:", error);
+        }
+    };
+
+    // -------------------- UI --------------------
+    return (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg">
+                <h2 className="text-2xl font-bold mb-6">Agendar Nueva Cita</h2>
+
+                <form onSubmit={handleSubmit} className="space-y-6">
+
+                    {/* ESPECIALIDAD */}
+                    <select
+                        value={selectedSpecialty ?? ""}
+                        onChange={handlerSpecialtyChange}
+                        className="w-full border rounded-xl p-3"
+                    >
+                        <option value="" disabled>
+                            Selecciona especialidad...
+                        </option>
+                        {specialities.map((s) => (
+                            <option key={s.id_especialidad} value={s.id_especialidad}>
+                                {s.nombre_especialidad}
+                            </option>
+                        ))}
+                    </select>
+
+                    {/* DOCTOR */}
+                    {step >= 2 && (
+                        <select
+                            value={selectedDoctor ?? ""}
+                            onChange={handlerDoctorChange}
+                            className="w-full border rounded-xl p-3"
+                        >
+                            <option value="" disabled>
+                                Selecciona doctor...
+                            </option>
+                            {doctors.map((doc) => (
+                                <option key={doc.id_doctor} value={doc.id_doctor}>
+                                    {doc.nombre_doctor} {doc.apellidos_doctor}
+                                </option>
+                            ))}
+                        </select>
+                    )}
+
+                    {/* CALENDARIO */}
+                    {step >= 3 && (
+                        <Calendar
+                            mode="single"
+                            selected={date}
+                            onSelect={setDate}
+                            disabled={isDateDisabled}
+                        />
+                    )}
+
+                    {/* HORARIOS */}
+                    {date && selectedDoctor && availableHours.length > 0 && (
+                        <select
+                            value={selectedHour ?? ""}
+                            onChange={(e) => setSelectedHour(e.target.value)}
+                            className="w-full border rounded-xl p-3"
+                        >
+                            <option value="" disabled>
+                                Selecciona horario...
+                            </option>
+
+                            {availableHours.map((hour) => (
+                                <option key={hour} value={hour}>
+                                    {hour}
+                                </option>
+                            ))}
+                        </select>
+                    )}
+
+                    <div className="flex justify-end gap-3">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="px-4 py-2 bg-gray-200 rounded-xl"
+                        >
+                            Cancelar
+                        </button>
+
+                        <button
+                            type="submit"
+                            disabled={!selectedHour}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-xl disabled:opacity-40"
+                        >
+                            Confirmar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     );
-  };
-
-  const handleClose = () => {
-    setIsVisible(false);
-    setTimeout(onClose, 200);
-  };
-
-  return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center">
-      
-      {/* Overlay con blur real */}
-      <div
-        onClick={handleClose}
-        className={`absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${
-          isVisible ? "opacity-100" : "opacity-0"
-        }`}
-      />
-
-      {/* Modal */}
-      <div
-        className={`relative w-full max-w-lg mx-4 bg-white rounded-2xl shadow-2xl p-8 transition-all duration-300 transform ${
-          isVisible
-            ? "opacity-100 scale-100 translate-y-0"
-            : "opacity-0 scale-95 translate-y-4"
-        }`}
-      >
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">
-          Agendar Nueva Cita
-        </h2>
-
-        <form className="space-y-6">
-          {/* STEP 1 */}
-          {step >= 1 && (
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-600">
-                Especialidad
-              </label>
-
-              <select
-                value={selectedSpecialty ?? ""}
-                onChange={handlerSpecialtyChange}
-                className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-              >
-                <option value="" disabled>
-                  Selecciona una especialidad...
-                </option>
-
-                {specialities.map((s) => (
-                  <option
-                    key={s.id_especialidad}
-                    value={s.id_especialidad}
-                  >
-                    {s.nombre_especialidad}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* STEP 2 */}
-          {step >= 2 && (
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-600">
-                Doctor
-              </label>
-
-              <select
-                value={selectedDoctor ?? ""}
-                onChange={handlerDoctorChange}
-                className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-              >
-                <option value="" disabled>
-                  Selecciona un doctor...
-                </option>
-
-                {doctors.map((doc) => (
-                  <option
-                    key={doc.id_doctor}
-                    value={doc.id_doctor}
-                  >
-                    {doc.nombre_doctor} {doc.apellidos_doctor}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* STEP 3 */}
-          {step >= 3 && (
-            <div className="pt-2">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                disabled={isDateDisabled}
-                className="rounded-xl border"
-              />
-            </div>
-          )}
-
-          {/* BUTTONS */}
-          <div className="flex justify-end gap-3 pt-4">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="px-5 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 transition"
-            >
-              Cancelar
-            </button>
-
-            <button
-              type="submit"
-              disabled={!selectedDoctor || !date}
-              className="px-5 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-40"
-            >
-              Confirmar
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
 }
 
 export default ScheduleApModal;

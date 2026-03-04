@@ -1,5 +1,3 @@
-CREATE DATABASE MediCitas;
-use MediCitas;
 
 -- -----CREATING ENUM TYPES--------
 CREATE TYPE tipo_documento_enum AS ENUM (
@@ -78,7 +76,8 @@ CREATE TABLE Cita(
     id_cita SERIAL PRIMARY KEY,
     motivo_cita VARCHAR(200),
     estado_cita estado_cita_enum,
-    fecha_cita TIMESTAMP NOT NULL,
+    fecha_cita DATE NOT NULL,
+    hora_cita TIME,
 
     id_paciente_cita INT,
     id_doctor_cita INT,
