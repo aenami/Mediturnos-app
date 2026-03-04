@@ -13,6 +13,7 @@ export const initializePool = async () => {
     pool = new Pool( {
         connectionString: process.env.DATABASE_URL
     } )
+    
 
     // Verificamos la conexion a la bd conectandonos explicitamente a una conexion del pool
     try {
@@ -27,7 +28,7 @@ export const initializePool = async () => {
     
 };
 
-export const getConnection = async () => {
+export const getConnection = () => {
     if(!pool){
         throw new Error("El pool de conexiones no ha sido inicializado")
     }

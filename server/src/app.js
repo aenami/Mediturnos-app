@@ -1,7 +1,9 @@
 // -------Impotando modulos y librearias
 import express from "express"
 import cors from "cors"
-import dotenv from "dotenv"
+import DoctorRouter from "./routes/doctor.routes.js"
+import SpecialityRouter from "./routes/specialty.routes.js"
+
 const app = express()
 
 // -------Importando rutas
@@ -27,10 +29,8 @@ app.use(express.urlencoded( {extended: false} ))
 
 
 // ------- RUTAS CREADAS -----
-app.get("/", (req, res) => {
-    res.json( {message: "Api funcionando correctamente"} )
-})
-
+app.use('/doctors', DoctorRouter)
+app.use('/specialities', SpecialityRouter)
 
 // ------ RUTA POR DEFAULT
 
