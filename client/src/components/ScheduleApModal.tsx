@@ -6,13 +6,10 @@ type ModalProps = {
 };
 
 function ScheduleApModal({ onClose }: ModalProps) {
-  // -------------------- STEP FLOW --------------------
   const [step, setStep] = useState(1);
-
-  // -------------------- DATE --------------------
   const [date, setDate] = useState<Date | undefined>(undefined);
+  const [isVisible, setIsVisible] = useState(false);
 
-  // -------------------- INTERFACES --------------------
   interface Doctor {
     id_doctor: number;
     nombre_doctor: string;
@@ -24,14 +21,21 @@ function ScheduleApModal({ onClose }: ModalProps) {
     nombre_especialidad: string;
   }
 
-  // -------------------- STATES --------------------
   const [specialities, setSpecialities] = useState<Speciality[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
-
   const [selectedSpecialty, setSelectedSpecialty] = useState<number | null>(null);
   const [selectedDoctor, setSelectedDoctor] = useState<number | null>(null);
-
   const [doctorDates, setDoctorDates] = useState<Date[]>([]);
+
+  // -------------------- BLOQUEAR SCROLL DEL BODY --------------------
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    setTimeout(() => setIsVisible(true), 10);
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
 
   // -------------------- FETCH SPECIALITIES --------------------
   useEffect(() => {
@@ -43,15 +47,11 @@ function ScheduleApModal({ onClose }: ModalProps) {
       );
   }, []);
 
-  // -------------------- HANDLERS --------------------
-
-  // STEP 1 → Especialidad
   const handlerSpecialtyChange = async (
     e: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const id_specialty = Number(e.target.value);
 
-    // Reset de estados dependientes
     setSelectedSpecialty(id_specialty);
     setSelectedDoctor(null);
     setDoctors([]);
@@ -62,7 +62,6 @@ function ScheduleApModal({ onClose }: ModalProps) {
       const res = await fetch(
         `http://localhost:3000/doctors/specialities/${id_specialty}`
       );
-
       const data = await res.json();
       setDoctors(data);
       setStep(2);
@@ -71,7 +70,6 @@ function ScheduleApModal({ onClose }: ModalProps) {
     }
   };
 
-  // STEP 2 → Doctor
   const handlerDoctorChange = async (
     e: React.ChangeEvent<HTMLSelectElement>
   ) => {
@@ -87,8 +85,6 @@ function ScheduleApModal({ onClose }: ModalProps) {
       );
 
       const data = await res.json();
-
-      // Convertimos strings → Date
       const parsedDates = data.map((d: string) => new Date(d));
       setDoctorDates(parsedDates);
 
@@ -98,47 +94,57 @@ function ScheduleApModal({ onClose }: ModalProps) {
     }
   };
 
-  // -------------------- CALENDAR LOGIC --------------------
   const isDateDisabled = (currentDate: Date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Bloquear fechas pasadas
     if (currentDate < today) return true;
 
-    // Bloquear fechas ocupadas
-    const isOccupied = doctorDates.some(
+    return doctorDates.some(
       (d) => d.toDateString() === currentDate.toDateString()
     );
-
-    return isOccupied;
   };
 
-  // -------------------- UI --------------------
+  const handleClose = () => {
+    setIsVisible(false);
+    setTimeout(onClose, 200);
+  };
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50">
-      {/* Overlay */}
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+      
+      {/* Overlay con blur real */}
       <div
-        className="absolute inset-0 bg-black bg-opacity-50"
-        onClick={onClose}
-      ></div>
+        onClick={handleClose}
+        className={`absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${
+          isVisible ? "opacity-100" : "opacity-0"
+        }`}
+      />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-xl shadow-lg w-full max-w-md p-6 z-10">
-        <h2 className="text-xl font-semibold mb-4">
+      <div
+        className={`relative w-full max-w-lg mx-4 bg-white rounded-2xl shadow-2xl p-8 transition-all duration-300 transform ${
+          isVisible
+            ? "opacity-100 scale-100 translate-y-0"
+            : "opacity-0 scale-95 translate-y-4"
+        }`}
+      >
+        <h2 className="text-2xl font-bold mb-6 text-gray-800">
           Agendar Nueva Cita
         </h2>
 
-        <form className="space-y-4">
-          {/* ---------------- STEP 1 ---------------- */}
+        <form className="space-y-6">
+          {/* STEP 1 */}
           {step >= 1 && (
-            <>
-              <label>Selecciona una especialidad</label>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-600">
+                Especialidad
+              </label>
 
               <select
                 value={selectedSpecialty ?? ""}
                 onChange={handlerSpecialtyChange}
-                className="w-full border rounded-lg p-2"
+                className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
               >
                 <option value="" disabled>
                   Selecciona una especialidad...
@@ -153,18 +159,20 @@ function ScheduleApModal({ onClose }: ModalProps) {
                   </option>
                 ))}
               </select>
-            </>
+            </div>
           )}
 
-          {/* ---------------- STEP 2 ---------------- */}
+          {/* STEP 2 */}
           {step >= 2 && (
-            <>
-              <label>Selecciona un doctor</label>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-600">
+                Doctor
+              </label>
 
               <select
                 value={selectedDoctor ?? ""}
                 onChange={handlerDoctorChange}
-                className="w-full border rounded-lg p-2"
+                className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
               >
                 <option value="" disabled>
                   Selecciona un doctor...
@@ -179,28 +187,28 @@ function ScheduleApModal({ onClose }: ModalProps) {
                   </option>
                 ))}
               </select>
-            </>
+            </div>
           )}
 
-          {/* ---------------- STEP 3 ---------------- */}
+          {/* STEP 3 */}
           {step >= 3 && (
-            <div className="w-full overflow-x-auto">
+            <div className="pt-2">
               <Calendar
                 mode="single"
                 selected={date}
                 onSelect={setDate}
                 disabled={isDateDisabled}
-                className="rounded-lg border w-full"
+                className="rounded-xl border"
               />
             </div>
           )}
 
-          {/* ---------------- BUTTONS ---------------- */}
-          <div className="flex justify-end gap-2 pt-4">
+          {/* BUTTONS */}
+          <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded-lg bg-gray-200"
+              onClick={handleClose}
+              className="px-5 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 transition"
             >
               Cancelar
             </button>
@@ -208,7 +216,7 @@ function ScheduleApModal({ onClose }: ModalProps) {
             <button
               type="submit"
               disabled={!selectedDoctor || !date}
-              className="px-4 py-2 rounded-lg bg-blue-600 text-white disabled:opacity-50"
+              className="px-5 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-40"
             >
               Confirmar
             </button>

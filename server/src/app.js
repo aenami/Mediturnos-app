@@ -3,6 +3,7 @@ import express from "express"
 import cors from "cors"
 import DoctorRouter from "./routes/doctor.routes.js"
 import SpecialityRouter from "./routes/specialty.routes.js"
+import AppointmentsRouter from "./routes/appointment.routes.js"
 
 const app = express()
 
@@ -31,6 +32,7 @@ app.use(express.urlencoded( {extended: false} ))
 // ------- RUTAS CREADAS -----
 app.use('/doctors', DoctorRouter)
 app.use('/specialities', SpecialityRouter)
+app.use('/appointments', AppointmentsRouter)
 
 // ------ RUTA POR DEFAULT
 
