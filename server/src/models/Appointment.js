@@ -43,36 +43,52 @@ const Appointment = {
 	},
 
 	async getAppointmentsUser(id_user) {
-    try {
-        const query = `
-            SELECT 
-                Cita.fecha_cita AS fecha,
-                Cita.hora_cita AS hora,
-                Doctor.nombre_doctor,
-                Doctor.apellidos_doctor,
-                Especialidad.nombre_especialidad
-            FROM Cita
-            INNER JOIN Doctor 
-                ON Cita.id_doctor_cita = Doctor.id_doctor
-            INNER JOIN Especialidad 
-                ON Doctor.id_especialidad_doctor = Especialidad.id_especialidad
-            WHERE Cita.id_paciente_cita = $1
-            AND Cita.fecha_cita >= CURRENT_DATE
-            ORDER BY Cita.fecha_cita ASC, Cita.hora_cita ASC
-        `;
+		try {
+			const query = `
+				SELECT Cita.id_cita,
+					Cita.fecha_cita AS fecha,
+					Cita.hora_cita AS hora,
+					Doctor.nombre_doctor,
+					Doctor.apellidos_doctor,
+					Especialidad.nombre_especialidad
+				FROM Cita
+				INNER JOIN Doctor 
+					ON Cita.id_doctor_cita = Doctor.id_doctor
+				INNER JOIN Especialidad 
+					ON Doctor.id_especialidad_doctor = Especialidad.id_especialidad
+				WHERE Cita.id_paciente_cita = $1
+				AND Cita.fecha_cita >= CURRENT_DATE
+				ORDER BY Cita.fecha_cita ASC, Cita.hora_cita ASC
+			`;
 
-        const values = [id_user];
-        const pool = getConnection();
+			const values = [id_user];
+			const pool = getConnection();
 
-        const result = await pool.query(query, values);
+			const result = await pool.query(query, values);
 
-        return result.rows;
+			return result.rows;
 
-    } catch (error) {
-        console.log("Error al traer citas del usuario:", error);
-        throw error;
-    }
-}
+		} catch (error) {
+			console.log("Error al traer citas del usuario:", error);
+			throw error;
+		}
+	},
+
+	async deleteAppointment(id_appointment) {
+		try {
+			const query = `
+				DELETE FROM Cita
+				WHERE id_cita = $1
+			`;
+
+			const pool = getConnection();
+			await pool.query(query, [id_appointment]);
+
+		} catch (error) {
+			console.log("Error eliminando cita:", error);
+			throw error;
+		}
+	}
 
 };
 

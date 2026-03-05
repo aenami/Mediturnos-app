@@ -60,4 +60,22 @@ export const getAppointmentsUser = async (req, res) => {
     }
 };
 
+export const deleteAppointment = async (req, res) => {
+    const { id_appointment } = req.params;
+
+    try {
+        await Appointment.deleteAppointment(id_appointment);
+
+        res.status(200).json({
+            message: "Cita cancelada correctamente"
+        });
+
+    } catch (error) {
+        console.error("Error cancelando cita:", error);
+        res.status(500).json({
+            error: "Error interno del servidor"
+        });
+    }
+};
+
 
