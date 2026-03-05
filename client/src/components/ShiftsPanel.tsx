@@ -15,6 +15,9 @@ function ShiftsPanel() {
   const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  // Hook para traer las citas futuras cada que se cree una 
+  
+
   useEffect(() => {
     const fetchShifts = async () => {
       try {
@@ -40,7 +43,7 @@ function ShiftsPanel() {
     fetchShifts();
   }, []);
 
-  // UI DEL MODAL------------------
+  // UI DEL MODAL PARA CANCELAR------------------
   if (selectedShift && !successMessage) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">

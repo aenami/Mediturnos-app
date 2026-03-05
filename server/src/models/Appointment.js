@@ -22,7 +22,7 @@ const Appointment = {
 		}
 	},
 	
-	async createAppointment(motivo_cita, fecha_cita, hora_cita, id_doctor_cita, id_paciente_cita) {
+	async createAppointment(motivo_cita, fecha_cita, hora_cita, id_paciente_cita, id_doctor_cita ) {
 		try {
 			const query = `
 				INSERT INTO Cita 
@@ -45,16 +45,17 @@ const Appointment = {
 	async getAppointmentsUser(id_user) {
 		try {
 			const query = `
-				SELECT Cita.id_cita,
+				SELECT 
+					Cita.id_cita,
 					Cita.fecha_cita AS fecha,
 					Cita.hora_cita AS hora,
 					Doctor.nombre_doctor,
 					Doctor.apellidos_doctor,
 					Especialidad.nombre_especialidad
 				FROM Cita
-				INNER JOIN Doctor 
+				LEFT JOIN Doctor 
 					ON Cita.id_doctor_cita = Doctor.id_doctor
-				INNER JOIN Especialidad 
+				LEFT JOIN Especialidad 
 					ON Doctor.id_especialidad_doctor = Especialidad.id_especialidad
 				WHERE Cita.id_paciente_cita = $1
 				AND Cita.fecha_cita >= CURRENT_DATE
