@@ -44,4 +44,20 @@ export const createAppointment = async (req, res) => {
     }
 };
 
+export const getAppointmentsUser = async (req, res) => {
+    const id_user = 1
+
+    try {
+        const appointments = await Appointment.getAppointmentsUser(id_user);
+
+        res.status(200).json(appointments);
+
+    } catch (error) {
+        console.error("Error obteniendo citas del usuario:", error);
+        res.status(500).json({
+            error: "Error interno del servidor"
+        });
+    }
+};
+
 
