@@ -1,26 +1,31 @@
 import { getConnection} from "../config/db.js"
 
-const Doctor = {
-    async getAll(){
-        try {
-            const query = 'SELECT * FROM Doctor ORDER BY id_doctor ASC'
-            const pool = getConnection()
+// Creando la interfaces
+interface doctorNames {
+    id_doctor: number;
+    nombre_doctor: string;
+}
 
+interface doctorSpecialities {
+    id_doctor: number;
+    nombre_doctor: string;
+    apellidos_doctor: string;
+}
 
-            const result = await pool.query(query)
-            return result.rows
-        } catch (error) {
-            console.log('Error al traer todos los doctores de la db: ', error)
-        }
-    },
+interface typeDoctor {
+    getNames: () => Promise<doctorNames[] | undefined>;
+    getDoctorsSpecialities: (id_specialty: number) => Promise<doctorSpecialities[] | undefined>;
+}
 
+// ---------MODELO
+const Doctor: typeDoctor = {
     async getNames(){
          try {
             const query = 'SELECT id_doctor, nombre_doctor FROM Doctor ORDER BY id_doctor ASC'
             const pool = getConnection()
 
 
-            const result = await pool.query(query)
+            const result = await pool.query<doctorNames>(query)
             return result.rows
         } catch (error) {
             console.log('Error al traer todos los doctores de la db: ', error)
@@ -37,7 +42,7 @@ const Doctor = {
 
             const pool = getConnection()
 
-            const result = await pool.query(query, values)
+            const result = await pool.query<doctorSpecialities>(query, values)
             return result.rows
         } catch (error) {
             console.log('Error al traer todos los doctores relacionados con la especialidad elegida de la db: ', error)

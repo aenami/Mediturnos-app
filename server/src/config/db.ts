@@ -4,7 +4,7 @@ import dotenv from "dotenv"
 // Inicializando variables de entorno
 dotenv.config();
 
-let pool;
+let pool: Pool;
 
 // Funcion que se ejecutara desde index.js al levantar el servidor
 export const initializePool = async () => {
@@ -20,10 +20,15 @@ export const initializePool = async () => {
         const client = await pool.connect()
         console.log("Conexion realizada con exito")
         client.release();
-    } catch (error) {
-        // Terminamos el proceso y por ende el levantamiento del servidor
-        console.error("Error al intentar crear una conexion: ", error.message)
-        process.exit(1);
+    } catch (error: unknown) {
+        if(error instanceof Error){
+            // Terminamos el proceso y por ende el levantamiento del servidor
+            console.error("Error al intentar crear una conexion: ", error.message)
+            process.exit(1);
+        }else{
+            console.log("Ocurrio un error inesperado al crear el pool hacia la db")
+        }
+        
     }
     
 };

@@ -10,10 +10,12 @@
   },
   "type": "module",
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/pg": "^8.18.0",
     "nodemon": "^3.1.14"
   },
   "scripts": {
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.ts"
   }
 }

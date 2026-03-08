@@ -1,6 +1,6 @@
 // Importamos el modelo
-import User from "../models/User.ts"
-import { Request, Response} from 'express' // Importamos los tipos de datos para req/res
+import User from "../models/User.js"
+import type { Request, Response} from 'express' // Importamos los tipos de datos para req/res
 
 export const createUser = async (req: Request, res: Response) => {
     // Extrameos la informacion del formulario

@@ -4,7 +4,7 @@ import cors from "cors"
 import DoctorRouter from "./routes/doctor.routes.js"
 import SpecialityRouter from "./routes/specialty.routes.js"
 import AppointmentsRouter from "./routes/appointment.routes.js"
-import AuthenticationRoter from "./routes/auth.rotues.ts"
+import AuthenticationRoter from "./routes/auth.rotues.js"
 
 const app = express()
 

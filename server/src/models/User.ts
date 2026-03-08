@@ -44,7 +44,7 @@ const User: typeUser = {
             const result = await connection.query(query, values)
 
             // Verificamos si hubo algun dato duplicado
-            if(result.rows > 0){
+            if(result.rows.length > 0){
                 const duplicatedRegister = result.rows[0]
 
                 if(duplicatedRegister.documento_paciente == documento){

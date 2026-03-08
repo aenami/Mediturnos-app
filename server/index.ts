@@ -1,6 +1,6 @@
 import app from './src/app.js'
 import dotenv from 'dotenv'
-import { initializePool } from './src/config/db.js'
+import { initializePool } from './src/config/db.ts'
 
 dotenv.config() // Inicializamos variables de entorno en este archivo
 
