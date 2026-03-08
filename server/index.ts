@@ -1,4 +1,4 @@
-import app from './src/app.js'
+import app from './src/app.ts'
 import dotenv from 'dotenv'
 import { initializePool } from './src/config/db.ts'
 

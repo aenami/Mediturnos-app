@@ -1,6 +1,30 @@
 import { getConnection} from "../config/db.js"
 
-const Appointment = {
+interface appointmentsDate {
+	fecha_cita: string;
+	hora_cita: string;
+}
+
+interface appointmentUser {
+	id_cita: number;
+	fecha_cita: Date;
+	hora_cita: Date;
+	nombre_doctor: string;
+	apellidos_doctor: string;
+	nombre_especialidad: string;
+}
+
+
+interface typeAppointment {
+	getAppointmentsDoctor: (id_doctor: number) => Promise<appointmentsDate[] | undefined>;
+	createAppointment: (motivo_cita: string, fecha_cita: Date, 
+		hora_cita: Date, id_paciente_cita: number, 
+		id_doctor_cita: number) => void;
+	getAppointmentsUser: (id_user: number) => Promise<appointmentUser[] | undefined>;
+	deleteAppointment: (id_appointment: number) => void;
+}
+
+const Appointment: typeAppointment = {
 	async getAppointmentsDoctor(id_doctor) {
 		try {
 			const query = `
@@ -14,7 +38,7 @@ const Appointment = {
 			const values = [id_doctor];
 			const pool = getConnection();
 
-			const result = await pool.query(query, values);
+			const result = await pool.query<appointmentsDate>(query, values);
 			return result.rows;
 		} catch (error) {
 			console.log("Error al traer citas de la db: ", error);
@@ -65,7 +89,7 @@ const Appointment = {
 			const values = [id_user];
 			const pool = getConnection();
 
-			const result = await pool.query(query, values);
+			const result = await pool.query<appointmentUser>(query, values);
 
 			return result.rows;
 

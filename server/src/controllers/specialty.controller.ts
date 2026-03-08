@@ -1,6 +1,7 @@
 import Specialty from '../models/Specialty.js'
+import type {Request, Response } from 'express'
 
-export const getSpecialities = async (req, res) =>{
+export const getSpecialities = async (req: Request, res: Response) =>{
     try {
         const Specialities = await Specialty.getAll()
         res.status(200).json(Specialities)

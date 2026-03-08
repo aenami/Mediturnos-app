@@ -1,12 +1,22 @@
 // Importamos modelos necesarios
 import Appointment from '../models/Appointment.js'
+import type { Request, Response } from 'express'
 
-export const getAppointmentsDoctor = async (req, res) =>{
+interface appointmentsDoctorParams {
+    id_doctor: string;
+}
+
+interface deleteAppointmentParam {
+    id_appointment: string;
+}
+
+export const getAppointmentsDoctor = async (req: Request<appointmentsDoctorParams>, res: Response) =>{
     // Extraemos el id que definimos en la ruta
     const { id_doctor } = req.params;
+    const int_id_doctor = parseInt(id_doctor)
 
     try {
-        const appointments = await Appointment.getAppointmentsDoctor(id_doctor) // Pasarle el id del doctor
+        const appointments = await Appointment.getAppointmentsDoctor(int_id_doctor) // Pasarle el id del doctor
         res.status(200).json(appointments)
     } catch (error) {
         console.log('Error obteniendo fechas: ', error)
@@ -17,7 +27,7 @@ export const getAppointmentsDoctor = async (req, res) =>{
 
 }
 
-export const createAppointment = async (req, res) => {
+export const createAppointment = async (req: Request, res: Response) => {
     const { id_doctor, fecha, hora, motivo } = req.body;
 
     // Validación básica
@@ -26,7 +36,7 @@ export const createAppointment = async (req, res) => {
             error: "Todos los campos son obligatorios"
         });
     }
-
+    // CONVERTIR EL ID DEL USUARIO A NUMBER
     try {
         // Simulamos un paciente colocandole el id 1
         await Appointment.createAppointment(motivo, fecha, hora, 1, id_doctor);
@@ -43,7 +53,7 @@ export const createAppointment = async (req, res) => {
     }
 };
 
-export const getAppointmentsUser = async (req, res) => {
+export const getAppointmentsUser = async (req: Request, res: Response) => {
     const id_user = 1
 
     try {
@@ -59,11 +69,12 @@ export const getAppointmentsUser = async (req, res) => {
     }
 };
 
-export const deleteAppointment = async (req, res) => {
+export const deleteAppointment = async (req: Request<deleteAppointmentParam>, res: Response) => {
     const { id_appointment } = req.params;
+    const int_id_appointment = parseInt(id_appointment);
 
     try {
-        await Appointment.deleteAppointment(id_appointment);
+        Appointment.deleteAppointment(int_id_appointment);
 
         res.status(200).json({
             message: "Cita cancelada correctamente"
