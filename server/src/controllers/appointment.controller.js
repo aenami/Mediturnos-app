@@ -7,7 +7,6 @@ export const getAppointmentsDoctor = async (req, res) =>{
 
     try {
         const appointments = await Appointment.getAppointmentsDoctor(id_doctor) // Pasarle el id del doctor
-        console.log(appointments)
         res.status(200).json(appointments)
     } catch (error) {
         console.log('Error obteniendo fechas: ', error)

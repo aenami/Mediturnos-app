@@ -20,47 +20,50 @@ CREATE TYPE estado_cita_enum AS ENUM (
 -- SIMPLE TABLES
 CREATE TABLE Paciente (
     paciente_id SERIAL PRIMARY KEY,
-    nombre_paciente VARCHAR(50),
-    apellidos_paciente VARCHAR(60),
-    correo_paciente VARCHAR(50),
-    telefono_paciente VARCHAR(20),
-    tipo_documento_paciente tipo_documento_enum,
-    documento_paciente VARCHAR(20),
-    fecha_nacimiento_paciente DATE,
-    sexo_paciente sexo_enum,
-    direccion_paciente VARCHAR(40),
-    fecha_vinculacion_paciente DATE,
+    nombre_paciente VARCHAR(50) NOT NULL,
+    apellidos_paciente VARCHAR(60) NOT NULL,
+    contraseña_paciente VARCHAR(250) NOT NULL,
+    correo_paciente VARCHAR(50) NOT NULL,
+    telefono_paciente VARCHAR(20) NULL,
+    tipo_documento_paciente tipo_documento_enum NOT NULL,
+    documento_paciente VARCHAR(20) NOT NULL,
+    fecha_nacimiento_paciente DATE NULL,
+    sexo_paciente sexo_enum NULL,
+    direccion_paciente VARCHAR(40) NULL,
+    fecha_vinculacion_paciente DATE NOT NULL,
 
     -- LOGIC CONSTRAINTS
-    CONSTRAINT unique_documento_paciente UNIQUE(documento_paciente)
+    CONSTRAINT unique_documento_paciente UNIQUE(documento_paciente),
+    CONSTRAINT unique_correo_paciente UNIQUE(correo_paciente)
 );
 
 CREATE TABLE Especialidad (
     id_especialidad SERIAL PRIMARY KEY,
-    nombre_especialidad VARCHAR(60),
-    descripcion_especialidad VARCHAR(200)
+    nombre_especialidad VARCHAR(60) NOT NULL,
+    descripcion_especialidad VARCHAR(200) NULL
 );
 
 CREATE TABLE Consultorio (
     id_consultorio SERIAL PRIMARY KEY,
-    numero_consultorio INT,
-    piso_consultorio INT
+    numero_consultorio INT NOT NULL,
+    piso_consultorio INT NOT NULL
 );
 
 -- COMPLEX TABLES
 CREATE TABLE Doctor(
     id_doctor SERIAL PRIMARY KEY,
-    nombre_doctor VARCHAR(50),
-    apellidos_doctor VARCHAR(60),
-    correo_doctor VARCHAR(100),
-    telefono_doctor VARCHAR(20),
-    cedula_doctor VARCHAR(20),
-    sexo_doctor sexo_enum,
-    direccion_doctor VARCHAR(100),
-    fecha_vinculacion_doctor DATE,
+    nombre_doctor VARCHAR(50) NOT NULL,
+    apellidos_doctor VARCHAR(60) NOT NULL,
+    contraseña_doctor VARCHAR(250) NOT NULL,
+    correo_doctor VARCHAR(100) NOT NULL,
+    telefono_doctor VARCHAR(20) NULL,
+    cedula_doctor VARCHAR(20) NOT NULL,
+    sexo_doctor sexo_enum NULL,
+    direccion_doctor VARCHAR(100) NULL,
+    fecha_vinculacion_doctor DATE NOT NULL,
 
-    id_especialidad_doctor INT,
-    id_consultorio_doctor INT,
+    id_especialidad_doctor INT NOT NULL,
+    id_consultorio_doctor INT NOT NULL,
 
     -- FOREIGN KEYS
     CONSTRAINT fk_especialidad_doctor 
@@ -69,18 +72,22 @@ CREATE TABLE Doctor(
 
     CONSTRAINT fk_consultorio_doctor 
         FOREIGN KEY(id_consultorio_doctor) 
-        REFERENCES Consultorio(id_consultorio)
+        REFERENCES Consultorio(id_consultorio),
+    
+    -- LOGIC CONSTRAINTS
+    CONSTRAINT unique_documento_doctor UNIQUE(cedula_doctor),
+    CONSTRAINT unique_correo_doctor UNIQUE(correo_doctor)
 );
 
 CREATE TABLE Cita(
     id_cita SERIAL PRIMARY KEY,
-    motivo_cita VARCHAR(200),
-    estado_cita estado_cita_enum,
-    fecha_cita DATE NOT NULL,
-    hora_cita TIME,
+    motivo_cita VARCHAR(200) NOT NULL,
+    estado_cita estado_cita_enum NOT NULL,
+    fecha_cita DATE NOT NULL NOT NULL,
+    hora_cita TIME NOT NULL,
 
-    id_paciente_cita INT,
-    id_doctor_cita INT,
+    id_paciente_cita INT NOT NULL,
+    id_doctor_cita INT NOT NULL,
 
     -- FOREIGN KEYS
     CONSTRAINT fk_paciente_cita 

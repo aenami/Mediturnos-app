@@ -16,8 +16,6 @@ function ShiftsPanel() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Hook para traer las citas futuras cada que se cree una 
-  
-
   useEffect(() => {
     const fetchShifts = async () => {
       try {
