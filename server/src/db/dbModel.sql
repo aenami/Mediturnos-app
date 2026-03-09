@@ -19,6 +19,7 @@ CREATE TYPE estado_cita_enum AS ENUM (
 
 -- SIMPLE TABLES
 CREATE TABLE Paciente (
+    -- PACIENTE_ID NO
     paciente_id SERIAL PRIMARY KEY,
     nombre_paciente VARCHAR(50) NOT NULL,
     apellidos_paciente VARCHAR(60) NOT NULL,

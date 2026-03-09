@@ -1,12 +1,13 @@
 import express from 'express'
 // Importamos metodos de nuestro controlador
-import { createUser } from '../controllers/user.controller.js';
+import { createUser, loginUser } from '../controllers/user.controller.js';
 const router = express.Router()
 
 // Rutas de register
 router.post('/register', createUser)
 
 // Ruta de login
+router.post('/login', loginUser)
 
 export default router
 
