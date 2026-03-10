@@ -1,6 +1,6 @@
 import express from 'express'
 // Importamos metodos de nuestro controlador
-import { createUser, loginUser } from '../controllers/user.controller.js';
+import { createUser, loginUser } from '../controllers/auth.controller.js';
 const router = express.Router()
 
 // Rutas de register

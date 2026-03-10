@@ -1,9 +1,6 @@
 import { Pool } from "pg"
 import dotenv from "dotenv"
 
-// Inicializando variables de entorno
-dotenv.config();
-
 let pool: Pool;
 
 // Funcion que se ejecutara desde index.js al levantar el servidor

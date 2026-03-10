@@ -5,7 +5,8 @@ import DoctorRouter from "./routes/doctor.routes.js"
 import SpecialityRouter from "./routes/specialty.routes.js"
 import AppointmentsRouter from "./routes/appointment.routes.js"
 import AuthenticationRoter from "./routes/auth.routes.js"
-
+import dotenv from "dotenv"
+dotenv.config();
 const app = express()
 
 // -------Importando rutas

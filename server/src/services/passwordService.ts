@@ -16,6 +16,8 @@ export const hashPassword = async (password:string) =>{
 
 export const compareHash = async (password: string, hashedPassword:string) => {
     try {
+        console.log('Contraseñita: ' ,password)
+        console.log('hashedpasswror: ', hashedPassword)
         const isMatch = await bcrypt.compare(password, hashedPassword)
         return isMatch;
     } catch (error) {

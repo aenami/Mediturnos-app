@@ -9,16 +9,24 @@ interface typeUser {
     verifyCreateUser: (documento: number, correo: string) => Promise<string | undefined>;
     verifyUserExists: (documento: number) => Promise<true | false>;
     verifyLoginUser: (documento: number, contraseña: string) => Promise<true | false>;
+    getIdUser: (documento: number) => Promise<dataUser>;
+}
+
+interface dataUser {
+    paciente_id: number;
+    nombre_paciente: string;
 }
 
 const User: typeUser = {
     async createUser(nombre, apellidos, correo, tipo_documento, documento, hashedPassword) {
         try {
             // Creando la consulta
-            const query: string = `INSERT INTO Paciente (nombre_paciente, apellidos_paciente, correo_paciente, tipo_documento_paciente, documento_paciente, contraseña_paciente) VALUES ($1, $2, $3, $4, $5, $6);`
+            const query: string = `INSERT INTO Paciente (nombre_paciente, apellidos_paciente, correo_paciente, tipo_documento_paciente, documento_paciente, contraseña_paciente, fecha_vinculacion_paciente) VALUES ($1, $2, $3, $4, $5, $6, $7);`
+
+            const todayDate = new Date().toISOString();
 
             // Defininimos que los valores de la consulta estaran almacenados en una lista de string o numbers
-            const values: (string | number)[] = [nombre, apellidos, correo, tipo_documento, documento, hashedPassword]
+            const values: (string | number)[] = [nombre, apellidos, correo, tipo_documento, documento, hashedPassword, todayDate]
 
             // Instacimos conexion a la db
             const pool = getConnection()
@@ -96,19 +104,27 @@ const User: typeUser = {
             const connection = getConnection()
             const result = await connection.query(query, values)
 
-            const isMatch = await compareHash(contraseña, result.rows[0]) 
+            const isMatch = await compareHash(contraseña, result.rows[0].contraseña_paciente) 
 
-            if(isMatch){
-                return true
-            }
-            return false
+            return isMatch
         } catch (error) {
             console.log('Error al verificar el documento / contraseña ingresado')
             throw error
         }
     },
 
-
+    async getIdUser(documento: number) {
+        try {
+            const query = `SELECT paciente_id, nombre_paciente FROM Paciente WHERE documento_paciente = $1`
+            const values = [documento]
+            const connection = getConnection()
+            const result = await connection.query(query,values)
+            return result.rows[0] // retornamos el primer objeto
+        } catch (error) {
+            console.log('Error al obtener el id del paciente a partir de su documento')
+            throw error
+        }
+    },
 
 }
 
