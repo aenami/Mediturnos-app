@@ -1,12 +1,14 @@
 // Importamos modelos necesarios
+import { parse } from 'node:path';
 import Appointment from '../models/Appointment.js'
 import type { Request, Response } from 'express'
+import { RequestHandler } from 'express';
 
 interface appointmentsDoctorParams {
     id_doctor: string;
 }
 
-interface deleteAppointmentParam {
+type deleteAppointmentParam = {
     id_appointment: string;
 }
 
@@ -30,16 +32,18 @@ export const getAppointmentsDoctor = async (req: Request<appointmentsDoctorParam
 export const createAppointment = async (req: Request, res: Response) => {
     const { id_doctor, fecha, hora, motivo } = req.body;
 
+    // Traemos el id del usuario gracias al middleware de autenticacion
+    const { id } = req.user!
+
     // Validación básica
     if (!id_doctor || !fecha || !hora || !motivo) {
         return res.status(400).json({
             error: "Todos los campos son obligatorios"
         });
     }
-    // CONVERTIR EL ID DEL USUARIO A NUMBER
+
     try {
-        // Simulamos un paciente colocandole el id 1
-        await Appointment.createAppointment(motivo, fecha, hora, 1, id_doctor);
+        Appointment.createAppointment(motivo, fecha, hora, id, id_doctor);
 
         res.status(201).json({
             message: "Cita creada correctamente"
@@ -53,11 +57,11 @@ export const createAppointment = async (req: Request, res: Response) => {
     }
 };
 
-export const getAppointmentsUser = async (req: Request, res: Response) => {
-    const id_user = 1
+export const getAppointmentsUser: RequestHandler = async (req, res) => {
+    const { id } = req.user! // Le aseguramos a ts que req.user no sera undefined (Ya que sabemos que paso por el middleware al haber llegado a este controlador)
 
     try {
-        const appointments = await Appointment.getAppointmentsUser(id_user);
+        const appointments = await Appointment.getAppointmentsUser(id);
 
         res.status(200).json(appointments);
 
@@ -69,7 +73,7 @@ export const getAppointmentsUser = async (req: Request, res: Response) => {
     }
 };
 
-export const deleteAppointment = async (req: Request<deleteAppointmentParam>, res: Response) => {
+export const deleteAppointment:RequestHandler<deleteAppointmentParam> = async (req, res) => {
     const { id_appointment } = req.params;
     const int_id_appointment = parseInt(id_appointment);
 

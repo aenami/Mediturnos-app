@@ -9,8 +9,18 @@
     "outDir": "./dist",
     "strict": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+
+    // --- CONFIGURACIÓN DE TIPOS ---
+    "typeRoots": [
+      "./node_modules/@types",
+      "./@types" 
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "*": ["node_modules/*", "@types/*"]
+    }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "src/@types/express/types"],
   "exclude": ["node_modules"]
 }

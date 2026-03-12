@@ -14,7 +14,6 @@ interface appointmentUser {
 	nombre_especialidad: string;
 }
 
-
 interface typeAppointment {
 	getAppointmentsDoctor: (id_doctor: number) => Promise<appointmentsDate[] | undefined>;
 	createAppointment: (motivo_cita: string, fecha_cita: Date, 
