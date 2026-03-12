@@ -1,11 +1,23 @@
-import { useState, type ChangeEvent, type SubmitEventHandler } from "react";
+import { useEffect, useState, type ChangeEvent, type SubmitEventHandler } from "react";
 import { useNavigate } from "react-router-dom";
 import { authService } from "../services/authService";
+import { tokenManager } from "@/utils/tokenManager";
 
 function Login() {
-
+    // Verificacion para ver si el usuario ya tiene un token o no
     const navigate = useNavigate();
 
+    useEffect(() => {
+
+        const token = tokenManager.getToken();
+
+        if (token) {
+            navigate("/workspace");
+        }
+
+    }, []);
+
+    // Estados necesarios
     const [documento, setDocumento] = useState("");
     const [password, setPassword] = useState("");
 
