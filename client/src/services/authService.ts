@@ -4,7 +4,7 @@ import { tokenManager } from "../utils/tokenManager"
 const API_URL = import.meta.env.VITE_API_URL;
 
 type typesCredentials = {
-    documento: number;
+    int_document: number;
     password: string;
 }
 
@@ -21,6 +21,7 @@ export const authService = {
     
     async loginUser(credentials: typesCredentials) {
         try {
+
             //1. Hacemos la peticion a la API para poder logearnos
             const response = await fetch(`${API_URL}/login`, {
                 method: "POST",

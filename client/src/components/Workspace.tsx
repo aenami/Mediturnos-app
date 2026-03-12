@@ -5,7 +5,7 @@ import EspecialitiesPanel from './EspecialitiesPanel';
 import ScheduleApModal from './ScheduleApModal';
 import { Calendar } from "@/components/ui/calendar"
 import { useState, useEffect } from 'react';
-
+import Navbar from '../components/Navbar'
 
 function Workspace() {
     const [date, setDate] = React.useState<Date | undefined>(new Date())
@@ -46,6 +46,7 @@ function Workspace() {
 
   return (
 		<>
+			<Navbar/>
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-4 p-6">
 				<div className="lg:col-span-2 space-y-4">
         
