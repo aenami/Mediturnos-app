@@ -30,6 +30,7 @@ export const getAppointmentsDoctor = async (req: Request<appointmentsDoctorParam
 }
 
 export const createAppointment = async (req: Request, res: Response) => {
+    console.log('hola')
     const { id_doctor, fecha, hora, motivo } = req.body;
 
     // Traemos el id del usuario gracias al middleware de autenticacion
@@ -59,7 +60,6 @@ export const createAppointment = async (req: Request, res: Response) => {
 
 export const getAppointmentsUser: RequestHandler = async (req, res) => {
     const { id } = req.user! // Le aseguramos a ts que req.user no sera undefined (Ya que sabemos que paso por el middleware al haber llegado a este controlador)
-
     try {
         const appointments = await Appointment.getAppointmentsUser(id);
 

@@ -8,6 +8,15 @@ type typesCredentials = {
     password: string;
 }
 
+type RegisterData = {
+    nombre: string
+    apellidos: string
+    correo: string
+    tipo_documento: string
+    documento: number
+    password: string
+}
+
 type typesUserData = {
     nombre: string;
     apellidos: string;
@@ -77,5 +86,23 @@ export const authService = {
 
     logout() {
         tokenManager.clearSession();
+    },
+}
+
+export async function registerUser(data: RegisterData) {
+    const response = await fetch(`${API_URL}/register`, {
+        method: "post",
+        headers: {
+        "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+        throw new Error(result.message || "Error al registrar usuario")
     }
+
+    return result
 }

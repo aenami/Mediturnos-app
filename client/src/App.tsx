@@ -1,11 +1,12 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Login from "../src/pages/login";
 import Workspace from "../src/components/Workspace";
+import Login from "./pages/login";
+import Register from "./pages/register";
 
 import ProtectedRoute from "../src/components/ProtectedRoute";
 
 function App() {
-  <Route path="/" element={<Login />} />
+  
   return (
     <BrowserRouter>
 
@@ -13,6 +14,9 @@ function App() {
 
         {/* Ruta pública */}
         <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Login />} />
+
+        <Route path="register" element={<Register />} />
 
         {/* Ruta protegida */}
         <Route

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, type SubmitEventHandler } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { useMemo } from "react";
-
+import { apiFetch } from "@/services/api";
 import SpecialtySelect from "../components/appointments/SpecialtySelect";
 import DoctorSelect from "../components/appointments/DoctorSelect";
 import HourSelect from "../components/appointments/HoursSelect";
@@ -27,6 +27,7 @@ interface Appointment {
 }
 
 function ScheduleApModal({ onClose }: ModalProps) {
+
     const [step, setStep] = useState(1);
     const [date, setDate] = useState<Date | undefined>();
     const [selectedHour, setSelectedHour] = useState<string | null>(null);
@@ -43,27 +44,47 @@ function ScheduleApModal({ onClose }: ModalProps) {
 
     // -------------------- FETCH SPECIALITIES --------------------
     useEffect(() => {
-        fetch("http://localhost:3000/specialities")
-            .then((res) => res.json())
-            .then(setSpecialities);
+
+        const fetchSpecialities = async () => {
+
+            try {
+
+                const data = await apiFetch("/specialities");
+                setSpecialities(data);
+
+            } catch (error) {
+
+                console.error("Error cargando especialidades:", error);
+
+            }
+
+        };
+
+        fetchSpecialities();
+
     }, []);
 
     // -------------------- GENERAR HORARIOS BASE --------------------
     const generateBaseHours = () => {
+
         const hours: string[] = [];
 
         for (let h = 8; h <= 16; h++) {
-            if (h === 12) continue; // Almuerzo
+
+            if (h === 12) continue;
 
             const formatted = `${h.toString().padStart(2, "0")}:00`;
             hours.push(formatted);
+
         }
 
         return hours;
+
     };
-    
+
     // -------------------- FILTRAR HORARIOS DISPONIBLES --------------------
     const availableHours = useMemo(() => {
+
         if (!date || !selectedDoctor) return [];
 
         const baseHours = generateBaseHours();
@@ -73,15 +94,15 @@ function ScheduleApModal({ onClose }: ModalProps) {
             .filter((a) => a.fecha === selectedDateString)
             .map((a) => a.hora);
 
-        return baseHours.filter(
-            (hour) => !occupiedHours.includes(hour)
-        );
+        return baseHours.filter((hour) => !occupiedHours.includes(hour));
+
     }, [date, selectedDoctor, appointments]);
 
     // -------------------- HANDLERS --------------------
     const handlerSpecialtyChange = async (
         e: React.ChangeEvent<HTMLSelectElement>
     ) => {
+
         const id_specialty = Number(e.target.value);
 
         setSelectedSpecialty(id_specialty);
@@ -91,75 +112,94 @@ function ScheduleApModal({ onClose }: ModalProps) {
         setDate(undefined);
         setSelectedHour(null);
 
-        const res = await fetch(
-            `http://localhost:3000/doctors/specialities/${id_specialty}`
-        );
+        try {
 
-        const data = await res.json();
-        setDoctors(data);
-        setStep(2);
+            const data = await apiFetch(`/doctors/specialities/${id_specialty}`);
+            setDoctors(data);
+            setStep(2);
+
+        } catch (error) {
+
+            console.error("Error cargando doctores:", error);
+
+        }
+
     };
 
     const handlerDoctorChange = async (
         e: React.ChangeEvent<HTMLSelectElement>
     ) => {
+
         const id_doctor = Number(e.target.value);
 
         setSelectedDoctor(id_doctor);
         setDate(undefined);
         setSelectedHour(null);
 
-        const res = await fetch(
-            `http://localhost:3000/appointments/doctors/${id_doctor}`
-        );
+        try {
 
-        const data = await res.json();
-        setAppointments(data);
+            const data = await apiFetch(`/appointments/doctors/${id_doctor}`);
+            setAppointments(data);
+            setStep(3);
 
-        setStep(3);
+        } catch (error) {
+
+            console.error("Error cargando citas del doctor:", error);
+
+        }
+
     };
 
     const isDateDisabled = (currentDate: Date) => {
+
         const tomorrow = new Date();
         tomorrow.setHours(0, 0, 0, 0);
         tomorrow.setDate(tomorrow.getDate() + 1);
 
         return currentDate < tomorrow;
+
     };
 
     // -------------------- POST APPOINTMENT --------------------
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit: SubmitEventHandler = async (e) => {
+
         e.preventDefault();
 
         if (!selectedDoctor || !date || !selectedHour) return;
 
         const payload = {
+
             id_doctor: selectedDoctor,
             fecha: date.toISOString().split("T")[0],
             hora: selectedHour,
             motivo: reason
+
         };
 
         try {
-            await fetch("http://localhost:3000/appointments", {
+
+            await apiFetch("/appointments", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
                 body: JSON.stringify(payload),
             });
 
             setSuccessMessage("¡Tu cita fue agendada correctamente!");
-            
+
         } catch (error) {
+
             console.error("Error al crear cita:", error);
+
         }
+
     };
 
     // -------------------- UI --------------------
     if (successMessage) {
+
         return (
+
             <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40 backdrop-blur-sm">
+
                 <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md text-center space-y-6">
 
                     <div className="text-green-600 text-5xl">
@@ -180,16 +220,26 @@ function ScheduleApModal({ onClose }: ModalProps) {
                     >
                         Entendido
                     </button>
+
                 </div>
+
             </div>
+
         );
+
     }
+
     return (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40 backdrop-blur-sm">
+
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
-                <h2 className="text-2xl font-bold mb-6">Agendar Nueva Cita</h2>
+
+                <h2 className="text-2xl font-bold mb-6">
+                    Agendar Nueva Cita
+                </h2>
 
                 <div className="overflow-y-auto px-8 py-6">
+
                     <form onSubmit={handleSubmit} className="space-y-6">
 
                         <SpecialtySelect
@@ -225,9 +275,11 @@ function ScheduleApModal({ onClose }: ModalProps) {
 
                         {selectedHour && (
                             <div className="flex flex-col">
+
                                 <label className="mb-2 font-medium">
                                     Motivo de la cita
                                 </label>
+
                                 <textarea
                                     value={reason}
                                     onChange={(e) => setReason(e.target.value)}
@@ -236,10 +288,12 @@ function ScheduleApModal({ onClose }: ModalProps) {
                                     placeholder="Describe brevemente el motivo..."
                                     required
                                 />
+
                             </div>
                         )}
 
                         <div className="flex justify-end gap-3">
+
                             <button
                                 type="button"
                                 onClick={onClose}
@@ -255,11 +309,15 @@ function ScheduleApModal({ onClose }: ModalProps) {
                             >
                                 Confirmar
                             </button>
+
                         </div>
+
                     </form>
+
                 </div>
-                
+
             </div>
+
         </div>
     );
 }

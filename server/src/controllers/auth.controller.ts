@@ -44,10 +44,10 @@ export const createUser = async (req: Request, res: Response) => {
 export const loginUser = async (req: Request, res: Response) => {
     try {
         // Extraemos la informacion del formulario
-        const {documento, password} = req.body
+        const {int_document, password} = req.body
 
         // Verificamos que el usuario exista en la db
-        const userExists = await User.verifyUserExists(documento)
+        const userExists = await User.verifyUserExists(int_document)
 
         if(!userExists){
             return res.status(409).json({
@@ -57,7 +57,7 @@ export const loginUser = async (req: Request, res: Response) => {
         }
 
         // Verificar la informacion ingresada por el usuario
-        const validateData = await User.verifyLoginUser(documento, password)
+        const validateData = await User.verifyLoginUser(int_document, password)
 
         if(!validateData) {
             return res.status(409).json({
@@ -67,7 +67,7 @@ export const loginUser = async (req: Request, res: Response) => {
         }
 
         // Luego de validar que si se ingreso la contraseña corecta, hacemos una consulta que traera el id del paciente el cual incluiremos en el body de nuestro token. Tambien informacion extra
-        const pacienteData = await User.getIdUser(documento)
+        const pacienteData = await User.getIdUser(int_document)
         const token = generateToken(pacienteData.paciente_id)
 
         //-------Devolvemos la respuesta correcta al frontend con el token y la informacion del user logeado

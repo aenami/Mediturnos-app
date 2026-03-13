@@ -1,6 +1,7 @@
 import React from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { GiHealthNormal } from "react-icons/gi";
+import { tokenManager } from '@/utils/tokenManager'
 
 function Navbar() {
   return (
@@ -12,7 +13,7 @@ function Navbar() {
         </div>
 
         <div className='flex gap-5 items-center'>
-            <span>UserName</span>
+            <span> {tokenManager.getUser().nombre} </span>
             <Avatar>
                 <AvatarImage src="https://github.com/shadcn.png" />
                 <AvatarFallback>CN</AvatarFallback>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { apiFetch } from "@/services/api";
 
 interface Shift {
   fecha: string;
@@ -11,28 +12,24 @@ interface Shift {
 
 function ShiftsPanel() {
   const [shifts, setShifts] = useState<Shift[]>([]);
-
   const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Hook para traer las citas futuras cada que se cree una 
+  // Traer citas futuras
   useEffect(() => {
     const fetchShifts = async () => {
       try {
-        const res = await fetch("http://localhost:3000/appointments/user");
-        const data = await res.json();
+        const data = await apiFetch<Shift[]>("/appointments/user");
 
-        // Filtrar solo futuras (doble seguridad)
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        const futureShifts = data.filter((shift: Shift) => {
+        const futureShifts = data.filter((shift) => {
           const shiftDate = new Date(shift.fecha);
           return shiftDate >= today;
         });
 
         setShifts(futureShifts);
-
       } catch (error) {
         console.error("Error cargando turnos:", error);
       }
@@ -41,7 +38,7 @@ function ShiftsPanel() {
     fetchShifts();
   }, []);
 
-  // UI DEL MODAL PARA CANCELAR------------------
+  // ---------------- MODAL CANCELAR ----------------
   if (selectedShift && !successMessage) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
@@ -64,18 +61,21 @@ function ShiftsPanel() {
 
             <button
               onClick={async () => {
-                await fetch(
-                  `http://localhost:3000/appointments/${selectedShift.id_cita}`,
-                  { method: "DELETE" }
-                );
+                try {
+                  await apiFetch(`/appointments/${selectedShift.id_cita}`, {
+                    method: "DELETE",
+                  });
 
-                setSuccessMessage("La cita fue cancelada correctamente");
-                setSelectedShift(null);
+                  setSuccessMessage("La cita fue cancelada correctamente");
+                  setSelectedShift(null);
 
-                // Refrescar lista
-                setShifts((prev) =>
-                  prev.filter((s) => s.id_cita !== selectedShift.id_cita)
-                );
+                  // actualizar lista local
+                  setShifts((prev) =>
+                    prev.filter((s) => s.id_cita !== selectedShift.id_cita)
+                  );
+                } catch (error) {
+                  console.error("Error cancelando cita:", error);
+                }
               }}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
             >
@@ -86,7 +86,8 @@ function ShiftsPanel() {
       </div>
     );
   }
-  // MODAL DE CONFIRMACION --------------
+
+  // ---------------- MODAL CONFIRMACION ----------------
   if (successMessage) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
@@ -108,7 +109,7 @@ function ShiftsPanel() {
     );
   }
 
- // UI BASICA--------------------
+  // ---------------- UI ----------------
   return (
     <div className="bg-gray-100 p-6 rounded-xl">
       <div className="flex justify-between mb-4">
@@ -123,13 +124,11 @@ function ShiftsPanel() {
             No tienes turnos agendados.
           </div>
         ) : (
-
-          shifts.slice(0, 3).map((shift, index) => (
+          shifts.slice(0, 3).map((shift) => (
             <div
-              key={index}
+              key={shift.id_cita}
               className="bg-white p-4 rounded-lg border shadow-sm hover:shadow-md transition flex justify-between items-center"
             >
-              {/* Información del turno */}
               <div>
                 <div className="font-medium">
                   {shift.nombre_especialidad}
@@ -144,17 +143,14 @@ function ShiftsPanel() {
                 </div>
               </div>
 
-              {/* Botón cancelar */}
               <button
                 onClick={() => setSelectedShift(shift)}
                 className="bg-red-100 text-red-600 hover:bg-red-500 hover:text-white font-semibold px-4 py-2 rounded-lg transition duration-300 border border-red-300"
               >
                 Cancelar
               </button>
-
             </div>
           ))
-
         )}
       </div>
     </div>

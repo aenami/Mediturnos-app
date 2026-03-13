@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { apiFetch } from "@/services/api";
 
 function RecordPanel() {
 
@@ -7,8 +8,7 @@ function RecordPanel() {
   useEffect(() => {
     const fetchPastShifts = async () => {
       try {
-        const response = await fetch("http://localhost:3000/appointments/user"); // usuario id 1
-        const data = await response.json();
+        const data = await apiFetch("/appointments/user");
 
         const now = new Date();
 

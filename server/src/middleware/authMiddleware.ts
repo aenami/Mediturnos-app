@@ -27,10 +27,9 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) => 
                 message: 'Token INVALIDO'
             })
         }
-
+        
         //3. Decodificamos el token para verificar su firma. Si esto falla, el try-catch atrapa el error
         const payload = jwt.verify(token, process.env.JWT_SECRET!) as typePayload; // Le decimos a ts que esto devolvera un objeto con mi estructura
-
         req.user = payload; // Agregamos el payloud a una propiedad user que creamos dentro de la request
 
         next();

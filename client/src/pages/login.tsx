@@ -2,6 +2,7 @@ import { useEffect, useState, type ChangeEvent, type SubmitEventHandler } from "
 import { useNavigate } from "react-router-dom";
 import { authService } from "../services/authService";
 import { tokenManager } from "@/utils/tokenManager";
+import { Link } from "react-router-dom";
 
 function Login() {
     // Verificacion para ver si el usuario ya tiene un token o no
@@ -42,6 +43,7 @@ function Login() {
         } catch (err: unknown) {
             // Verifiamos que la variable err sea una instancia de Error
             if(err instanceof Error){
+                console.log(err)
                 setError(err.message);
             }else{
                 console.log('Ocurrio un error inesperado al manejar el evento submit')
@@ -72,7 +74,7 @@ function Login() {
 
                     <div>
                         <label className="block text-sm font-medium mb-1">
-                            Email
+                            Documento
                         </label>
 
                         <input
@@ -109,13 +111,7 @@ function Login() {
                 </form>
 
                 <p className="text-sm text-center mt-4">
-                    ¿No tienes cuenta?{" "}
-                    <a
-                        href="/register"
-                        className="text-blue-600 hover:underline"
-                    >
-                        Crear cuenta
-                    </a>
+                    <Link to="/register" className="text-blue-600 hover:underline">¿No tienes cuenta?</Link>
                 </p>
 
             </div>
